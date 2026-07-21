@@ -1,0 +1,32 @@
+# NAMESPACE generado a mano para uso con devtools/roxygen posterior.
+# Si en algún momento agregas más funciones y documentación con roxygen2,
+# puedes regenerar este archivo con devtools::document().
+
+export(corporate_colors)
+export(accent_colors)
+export(neutral)
+export(corporate_palette)
+export(traffic_colors)
+export(positive_color)
+export(negative_color)
+export(target_color)
+export(forecast_color)
+
+export(theme_corporate)
+export(scale_fill_corporate)
+export(scale_color_corporate)
+export(scale_fill_gradient_corporate)
+export(scale_color_gradient_corporate)
+
+export(calcular_alineacion_inteligente)
+export(etiqueta_final_inteligente)
+export(etiquetas_repel_inteligentes)
+
+export(escala_fecha_inteligente)
+export(tema_eje_x_inteligente)
+export(finalizar_grafico)
+
+export(cargar_fuentes_corporativas)
+
+importFrom(dplyr, case_when)
+importFrom(rlang, enquo)

@@ -1,0 +1,23 @@
+Package: cenaictemas
+Type: Package
+Title: Tema Corporativo y Etiquetado Inteligente para ggplot2
+Version: 0.1.0
+Authors@R: person("Tu Nombre", email = "correo@ejemplo.com", role = c("aut", "cre"))
+Description: Sistema de identidad gráfica corporativa para ggplot2: paleta de
+    colores, tema visual estandarizado, y funciones de posicionamiento
+    automático de etiquetas y ejes que evitan textos truncados, empalmados o
+    fuera de lugar, sin importar el tamaño de los datos o el equipo de
+    cómputo donde se ejecute. Diseñado para ser instalado igual en cualquier
+    máquina vía install_github(), garantizando consistencia entre proyectos.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports:
+    ggplot2 (>= 3.4.0),
+    scales,
+    dplyr,
+    ggrepel,
+    rlang,
+    sysfonts,
+    showtext
+RoxygenNote: 7.2.3
