@@ -72,9 +72,12 @@ calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango,
 #' Reemplaza el patrón manual \code{geom_label(hjust = 1, vjust = 1, ...)}
 #' que se rompe en cuanto el punto cae en otra zona del gráfico. Esta
 #' función calcula la alineación óptima según la posición del punto y
-#' agrega un pequeño "empuje" (nudge) en la misma dirección para separar
-#' la etiqueta del punto sin que quede pegada o recortada por el borde
-#' del panel.
+#' ancla la etiqueta EXACTAMENTE en esa coordenada: \code{hjust}/\code{vjust}
+#' ya se encargan de que la caja de texto "crezca" hacia el lado correcto
+#' (el padding interno de \code{geom_label} da el respiro visual necesario
+#' frente al punto/marcador). No se aplica ningún desplazamiento adicional
+#' del punto de anclaje: agregar un "empuje" además de hjust/vjust duplica
+#' la separación y hace que la etiqueta se vea despegada del dato real.
 #'
 #' @param x_punto,y_punto Coordenadas del punto a etiquetar.
 #' @param etiqueta Texto de la etiqueta (ya formateado, ej. con
@@ -85,10 +88,7 @@ calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango,
 #' @param size Tamaño de fuente (en mm, como en \code{geom_label}).
 #' @param family Familia tipográfica.
 #' @param fontface Estilo de fuente.
-#' @param empuje Fracción base del rango que se usa como separación entre
-#'   el punto y la etiqueta (por defecto 3%). Igual que el margen de
-#'   colisión, se reparte de forma asimétrica entre X y Y según
-#'   \code{proporcion}.
+#' @param margen Ver \code{calcular_alineacion_inteligente()}.
 #' @param proporcion Proporción ancho:alto del panel (por defecto 18/9).
 #'   Debe coincidir con la que se use en \code{finalizar_grafico()} /
 #'   \code{proporcion_18_9()} para que el cálculo de colisión sea
@@ -101,38 +101,20 @@ etiqueta_final_inteligente <- function(x_punto, y_punto, etiqueta,
                                         color = "#123D4F", size = 5,
                                         family = getOption("cenaictemas.fuente", "sans"),
                                         fontface = "bold",
-                                        empuje = 0.03,
+                                        margen = 0.15,
                                         proporcion = PROPORCION_ANCHO / PROPORCION_ALTO) {
 
   alineacion <- calcular_alineacion_inteligente(x_punto, y_punto, x_rango, y_rango,
-                                                 proporcion = proporcion)
-
-  span_x <- as.numeric(diff(range(x_rango, na.rm = TRUE)))
-  span_y <- as.numeric(diff(range(y_rango, na.rm = TRUE)))
-
-  factor <- sqrt(proporcion)
-  empuje_x <- empuje / factor
-  empuje_y <- empuje * factor
-
-  # Empuja la etiqueta en dirección contraria a la que "creció" el hjust/vjust
-  dx <- dplyr::case_when(
-    alineacion$hjust == 1 ~ -empuje_x * span_x,
-    alineacion$hjust == 0 ~  empuje_x * span_x,
-    TRUE ~ 0
-  )
-  dy <- dplyr::case_when(
-    alineacion$vjust == 1 ~ -empuje_y * span_y,
-    alineacion$vjust == 0 ~  empuje_y * span_y,
-    TRUE ~ empuje_y * span_y
-  )
+                                                 margen = margen, proporcion = proporcion)
 
   ggplot2::annotate(
     "label",
-    x = x_punto + dx, y = y_punto + dy,
+    x = x_punto, y = y_punto,
     label = etiqueta,
     hjust = alineacion$hjust, vjust = alineacion$vjust,
     color = color, size = size, family = family, fontface = fontface,
-    label.size = 0, fill = "white", alpha = 0.9
+    label.size = 0, fill = "white", alpha = 0.9,
+    label.padding = ggplot2::unit(0.35, "lines")
   )
 }
 
