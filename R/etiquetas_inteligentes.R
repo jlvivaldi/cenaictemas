@@ -17,7 +17,7 @@
 #' del borde izquierdo, crece hacia la derecha (hjust = 0); en cualquier
 #' otro caso queda centrada. Se aplica la misma lógica en Y con vjust.
 #'
-#' IMPORTANTE sobre la proporción del panel: un panel 16:9 tiene casi el
+#' IMPORTANTE sobre la proporción del panel: un panel 18:9 tiene casi el
 #' doble de espacio físico en X que en Y. Por eso el margen de "zona de
 #' riesgo" NO se reparte igual en ambos ejes: se ajusta según
 #' \code{proporcion}, de forma que el margen en Y sea proporcionalmente
@@ -34,8 +34,8 @@
 #' @param margen Proporción base del rango que se considera "zona de
 #'   riesgo" cerca del borde (por defecto 0.15, es decir 15%). Este valor
 #'   se reparte de forma asimétrica entre X y Y según \code{proporcion}.
-#' @param proporcion Proporción ancho:alto del panel (por defecto 16/9,
-#'   la misma que fuerza \code{proporcion_16_9()}/\code{finalizar_grafico()}).
+#' @param proporcion Proporción ancho:alto del panel (por defecto 18/9,
+#'   la misma que fuerza \code{proporcion_18_9()}/\code{finalizar_grafico()}).
 #' @return Lista con \code{hjust}, \code{vjust}, y los márgenes efectivos
 #'   usados en cada eje (\code{margen_x}, \code{margen_y}), útil para
 #'   depurar por qué una etiqueta quedó alineada de cierta forma.
@@ -89,9 +89,9 @@ calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango,
 #'   el punto y la etiqueta (por defecto 3%). Igual que el margen de
 #'   colisión, se reparte de forma asimétrica entre X y Y según
 #'   \code{proporcion}.
-#' @param proporcion Proporción ancho:alto del panel (por defecto 16/9).
+#' @param proporcion Proporción ancho:alto del panel (por defecto 18/9).
 #'   Debe coincidir con la que se use en \code{finalizar_grafico()} /
-#'   \code{proporcion_16_9()} para que el cálculo de colisión sea
+#'   \code{proporcion_18_9()} para que el cálculo de colisión sea
 #'   consistente con la forma real del panel.
 #' @return Una capa \code{annotate("label", ...)} lista para sumarse a un
 #'   objeto ggplot.

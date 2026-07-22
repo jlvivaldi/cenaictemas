@@ -78,14 +78,14 @@ tema_eje_x_inteligente <- function(fechas) {
 #' Punto de entrada recomendado: en vez de armar \code{theme_corporate()} +
 #' escalas + proporción + márgenes a mano en cada gráfica (y arriesgarte a
 #' que la combinación truncie textos), esta función arma todo junto y de
-#' forma consistente, incluyendo forzar la proporción 16:9 en el panel.
+#' forma consistente, incluyendo forzar la proporción 18:9 en el panel.
 #'
 #' @param p Objeto ggplot ya construido (geoms, labs, etc.).
 #' @param fechas Vector de fechas de los datos, si el eje X es de fecha.
 #'   Si se provee, se agrega \code{escala_fecha_inteligente()} y
 #'   \code{tema_eje_x_inteligente()} automáticamente.
 #' @param expandir_derecha Ver \code{escala_fecha_inteligente()}.
-#' @param widescreen Forzar proporción 16:9 en el panel. Por defecto es
+#' @param widescreen Forzar proporción 18:9 en el panel. Por defecto es
 #'   \code{NULL}, lo que activa la proporción automáticamente EXCEPTO
 #'   cuando la gráfica usa \code{facet_wrap()}/\code{facet_grid()} (ya
 #'   que ahí \code{aspect.ratio} se aplicaría a cada panel individual, no
@@ -99,7 +99,7 @@ finalizar_grafico <- function(p, fechas = NULL, expandir_derecha = 0.08, widescr
   if (is.null(widescreen)) {
     widescreen <- !es_facetado
     if (es_facetado) {
-      message("Gráfica facetada detectada: no se fuerza 16:9 por panel. ",
+      message("Gráfica facetada detectada: no se fuerza 18:9 por panel. ",
               "Usa finalizar_grafico(..., widescreen = TRUE) si de todas formas lo quieres.")
     }
   }
@@ -107,7 +107,7 @@ finalizar_grafico <- function(p, fechas = NULL, expandir_derecha = 0.08, widescr
   p <- p + theme_corporate()
 
   if (isTRUE(widescreen)) {
-    p <- p + proporcion_16_9()
+    p <- p + proporcion_18_9()
   }
 
   if (!is.null(fechas)) {

@@ -30,8 +30,8 @@ export(cargar_fuentes_corporativas)
 
 export(PROPORCION_ANCHO)
 export(PROPORCION_ALTO)
-export(proporcion_16_9)
-export(guardar_grafico_16_9)
+export(proporcion_18_9)
+export(guardar_grafico_18_9)
 
 importFrom(dplyr, case_when)
 importFrom(rlang, enquo)
