@@ -12,21 +12,37 @@
 #'
 #' Ubica el punto dentro del rango de datos (como porcentaje) y decide
 #' hacia qué lado debe "crecer" la etiqueta para no salirse del panel.
-#' Si el punto está en el 15% final del eje X, la etiqueta crece hacia
-#' la izquierda (hjust = 1); si está en el 15% inicial, crece hacia la
-#' derecha (hjust = 0); en cualquier otro caso queda centrada. Se aplica
-#' la misma lógica en Y con vjust.
+#' Si el punto está en la zona de riesgo del borde derecho, la etiqueta
+#' crece hacia la izquierda (hjust = 1); si está en la zona de riesgo
+#' del borde izquierdo, crece hacia la derecha (hjust = 0); en cualquier
+#' otro caso queda centrada. Se aplica la misma lógica en Y con vjust.
+#'
+#' IMPORTANTE sobre la proporción del panel: un panel 16:9 tiene casi el
+#' doble de espacio físico en X que en Y. Por eso el margen de "zona de
+#' riesgo" NO se reparte igual en ambos ejes: se ajusta según
+#' \code{proporcion}, de forma que el margen en Y sea proporcionalmente
+#' mayor que en X (hay menos espacio físico vertical disponible), y el
+#' producto de ambos márgenes se mantenga constante en \code{margen^2}
+#' (para que el "margen" siga siendo comparable al usarlo como parámetro
+#' único).
 #'
 #' @param x_punto Valor de x del punto a etiquetar (numérico o Date).
 #' @param y_punto Valor de y del punto a etiquetar.
 #' @param x_rango Vector con el rango completo de x de los datos (o los
 #'   propios datos, se usa \code{range()} internamente).
 #' @param y_rango Vector con el rango completo de y de los datos.
-#' @param margen Proporción del rango que se considera "zona de riesgo"
-#'   cerca del borde (por defecto 0.15, es decir 15%).
-#' @return Lista con \code{hjust} y \code{vjust}.
+#' @param margen Proporción base del rango que se considera "zona de
+#'   riesgo" cerca del borde (por defecto 0.15, es decir 15%). Este valor
+#'   se reparte de forma asimétrica entre X y Y según \code{proporcion}.
+#' @param proporcion Proporción ancho:alto del panel (por defecto 16/9,
+#'   la misma que fuerza \code{proporcion_16_9()}/\code{finalizar_grafico()}).
+#' @return Lista con \code{hjust}, \code{vjust}, y los márgenes efectivos
+#'   usados en cada eje (\code{margen_x}, \code{margen_y}), útil para
+#'   depurar por qué una etiqueta quedó alineada de cierta forma.
 #' @export
-calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango, margen = 0.15) {
+calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango,
+                                             margen = 0.15,
+                                             proporcion = PROPORCION_ANCHO / PROPORCION_ALTO) {
 
   rx <- range(x_rango, na.rm = TRUE)
   ry <- range(y_rango, na.rm = TRUE)
@@ -37,10 +53,18 @@ calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango, 
   x_rel <- if (span_x == 0) 0.5 else as.numeric(x_punto - rx[1]) / span_x
   y_rel <- if (span_y == 0) 0.5 else as.numeric(y_punto - ry[1]) / span_y
 
-  hjust <- if (x_rel > 1 - margen) 1 else if (x_rel < margen) 0 else 0.5
-  vjust <- if (y_rel > 1 - margen) 1 else if (y_rel < margen) 0 else 0.5
+  # Reparto asimétrico: más espacio físico en X (panel ancho) -> margen
+  # de riesgo más chico ahí; menos espacio físico en Y -> margen más
+  # grande. sqrt(proporcion) mantiene margen_x * margen_y = margen^2.
+  factor <- sqrt(proporcion)
+  margen_x <- margen / factor
+  margen_y <- margen * factor
 
-  list(hjust = hjust, vjust = vjust, x_rel = x_rel, y_rel = y_rel)
+  hjust <- if (x_rel > 1 - margen_x) 1 else if (x_rel < margen_x) 0 else 0.5
+  vjust <- if (y_rel > 1 - margen_y) 1 else if (y_rel < margen_y) 0 else 0.5
+
+  list(hjust = hjust, vjust = vjust, x_rel = x_rel, y_rel = y_rel,
+       margen_x = margen_x, margen_y = margen_y)
 }
 
 #' Etiqueta de punto final con alineación automática
@@ -61,8 +85,14 @@ calcular_alineacion_inteligente <- function(x_punto, y_punto, x_rango, y_rango, 
 #' @param size Tamaño de fuente (en mm, como en \code{geom_label}).
 #' @param family Familia tipográfica.
 #' @param fontface Estilo de fuente.
-#' @param empuje Fracción del rango que se usa como separación entre el
-#'   punto y la etiqueta (por defecto 3%).
+#' @param empuje Fracción base del rango que se usa como separación entre
+#'   el punto y la etiqueta (por defecto 3%). Igual que el margen de
+#'   colisión, se reparte de forma asimétrica entre X y Y según
+#'   \code{proporcion}.
+#' @param proporcion Proporción ancho:alto del panel (por defecto 16/9).
+#'   Debe coincidir con la que se use en \code{finalizar_grafico()} /
+#'   \code{proporcion_16_9()} para que el cálculo de colisión sea
+#'   consistente con la forma real del panel.
 #' @return Una capa \code{annotate("label", ...)} lista para sumarse a un
 #'   objeto ggplot.
 #' @export
@@ -71,23 +101,29 @@ etiqueta_final_inteligente <- function(x_punto, y_punto, etiqueta,
                                         color = "#123D4F", size = 5,
                                         family = getOption("cenaictemas.fuente", "sans"),
                                         fontface = "bold",
-                                        empuje = 0.03) {
+                                        empuje = 0.03,
+                                        proporcion = PROPORCION_ANCHO / PROPORCION_ALTO) {
 
-  alineacion <- calcular_alineacion_inteligente(x_punto, y_punto, x_rango, y_rango)
+  alineacion <- calcular_alineacion_inteligente(x_punto, y_punto, x_rango, y_rango,
+                                                 proporcion = proporcion)
 
   span_x <- as.numeric(diff(range(x_rango, na.rm = TRUE)))
   span_y <- as.numeric(diff(range(y_rango, na.rm = TRUE)))
 
+  factor <- sqrt(proporcion)
+  empuje_x <- empuje / factor
+  empuje_y <- empuje * factor
+
   # Empuja la etiqueta en dirección contraria a la que "creció" el hjust/vjust
   dx <- dplyr::case_when(
-    alineacion$hjust == 1 ~ -empuje * span_x,
-    alineacion$hjust == 0 ~  empuje * span_x,
+    alineacion$hjust == 1 ~ -empuje_x * span_x,
+    alineacion$hjust == 0 ~  empuje_x * span_x,
     TRUE ~ 0
   )
   dy <- dplyr::case_when(
-    alineacion$vjust == 1 ~ -empuje * span_y,
-    alineacion$vjust == 0 ~  empuje * span_y,
-    TRUE ~ empuje * span_y
+    alineacion$vjust == 1 ~ -empuje_y * span_y,
+    alineacion$vjust == 0 ~  empuje_y * span_y,
+    TRUE ~ empuje_y * span_y
   )
 
   ggplot2::annotate(
