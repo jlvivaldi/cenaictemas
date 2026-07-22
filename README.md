@@ -57,12 +57,31 @@ p
 | `theme_corporate()` | Tema visual base (colores, tipografía, cuadrícula) |
 | `scale_fill_corporate()` / `scale_color_corporate()` | Paleta discreta corporativa |
 | `scale_fill_gradient_corporate()` | Paleta continua (mapas de calor) |
-| `etiqueta_final_inteligente()` | Coloca la etiqueta del último punto sin que se corte, sin importar en qué zona del gráfico caiga |
+| `proporcion_16_9()` | Fuerza el panel a proporción 16:9 real, sin importar el tamaño de ventana/archivo |
+| `guardar_grafico_16_9()` | `ggsave()` con dimensiones 16:9 ya calculadas |
+| `etiqueta_final_inteligente()` | Coloca la etiqueta del último punto sin que se corte, ajustando el margen de forma asimétrica entre X/Y según la proporción real del panel |
 | `etiquetas_repel_inteligentes()` | Etiquetas de múltiples series/categorías sin traslape (usa ggrepel) |
 | `escala_fecha_inteligente()` | Cortes de fecha automáticos según el rango de datos |
 | `tema_eje_x_inteligente()` | Rotación del eje X automática según cuántas marcas de fecha van a aparecer |
-| `finalizar_grafico()` | Aplica todo lo anterior en una sola línea |
+| `finalizar_grafico()` | Aplica todo lo anterior en una sola línea, incluyendo forzar 16:9 |
 | `cargar_fuentes_corporativas()` | Tipografía portable vía Google Fonts (no depende del equipo) |
+
+## Sobre la proporción 16:9
+
+Todas las gráficas deben verse en 16:9 horizontal. Esto se logra fijando
+la proporción del **panel** (no de la ventana) con
+`theme(aspect.ratio = 9/16)`, lo que garantiza esa forma sin importar
+dónde se ejecute o guarde la gráfica. `finalizar_grafico()` lo aplica
+automáticamente, **excepto** en gráficas con `facet_wrap()`/`facet_grid()`
+(ahí `aspect.ratio` afectaría cada panel individual, no el conjunto) —
+en ese caso lo puedes forzar explícitamente con
+`finalizar_grafico(p, widescreen = TRUE)` si de todas formas lo quieres.
+
+Como el panel siempre es 16:9 real, `etiqueta_final_inteligente()` puede
+repartir su margen de "zona de riesgo" de forma asimétrica: menos margen
+en X (hay más espacio físico horizontal) y más margen en Y (hay menos
+espacio físico vertical), en vez de tratar ambos ejes por igual como si
+el panel fuera cuadrado.
 
 ## Por qué esto y no copiar `Tema.R` a cada proyecto
 
