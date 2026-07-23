@@ -85,21 +85,27 @@ tema_eje_x_inteligente <- function(fechas) {
 #'   Si se provee, se agrega \code{escala_fecha_inteligente()} y
 #'   \code{tema_eje_x_inteligente()} automáticamente.
 #' @param expandir_derecha Ver \code{escala_fecha_inteligente()}.
-#' @param widescreen Forzar proporción 18:9 en el panel. Por defecto es
+#' @param widescreen Forzar proporción fija en el panel. Por defecto es
 #'   \code{NULL}, lo que activa la proporción automáticamente EXCEPTO
 #'   cuando la gráfica usa \code{facet_wrap()}/\code{facet_grid()} (ya
 #'   que ahí \code{aspect.ratio} se aplicaría a cada panel individual, no
-#'   al conjunto, y podría verse demasiado ancho). Pon \code{TRUE} o
+#'   al conjunto, y podría verse demasiado ancho/alto). Pon \code{TRUE} o
 #'   \code{FALSE} explícitamente para forzar el comportamiento.
+#' @param orientacion \code{"horizontal"} (18:9, por defecto) o
+#'   \code{"vertical"} (9:18). Debe coincidir con la orientación que
+#'   luego uses en \code{guardar_grafico_18_9()} para ese mismo gráfico.
 #' @export
-finalizar_grafico <- function(p, fechas = NULL, expandir_derecha = 0.08, widescreen = NULL) {
+finalizar_grafico <- function(p, fechas = NULL, expandir_derecha = 0.08,
+                               widescreen = NULL,
+                               orientacion = c("horizontal", "vertical")) {
 
+  orientacion <- match.arg(orientacion)
   es_facetado <- !inherits(p$facet, "FacetNull")
 
   if (is.null(widescreen)) {
     widescreen <- !es_facetado
     if (es_facetado) {
-      message("Gráfica facetada detectada: no se fuerza 18:9 por panel. ",
+      message("Gráfica facetada detectada: no se fuerza la proporción por panel. ",
               "Usa finalizar_grafico(..., widescreen = TRUE) si de todas formas lo quieres.")
     }
   }
@@ -107,7 +113,7 @@ finalizar_grafico <- function(p, fechas = NULL, expandir_derecha = 0.08, widescr
   p <- p + theme_corporate()
 
   if (isTRUE(widescreen)) {
-    p <- p + proporcion_18_9()
+    p <- p + proporcion_18_9(orientacion)
   }
 
   if (!is.null(fechas)) {
